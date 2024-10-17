@@ -7,5 +7,6 @@
         "module": "Preserve",
         "noEmit": true
     },
-    "include": ["./src/**/*"]
+    "include": ["./src/**/*"],
+    "file": ["./src/global.d.ts"]
 }

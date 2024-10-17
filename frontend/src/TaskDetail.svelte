@@ -311,7 +311,7 @@ window.addEventListener('hashchange', goToSelectedLines);
   </div>
 
   {#if showDiff}
-    <SubmitsDiff {submits} {current_submit} {deadline} />
+    <kelvin-diff {submits} {current_submit} {deadline} />
   {/if}
 
   <SummaryComments

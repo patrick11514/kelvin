@@ -1,5 +1,5 @@
 <script>
-import TimeAgo from './TimeAgo.svelte';
+import TimeAgo from "./TimeAgo.svelte";
 
 export let submits = [];
 export let current_submit;
@@ -51,7 +51,7 @@ $: if (a != b) {
           ><TimeAgo
             datetime={submit.submitted}
             rel={deadline}
-            suffix="after the deadline" /></strong>
+suffix="after the deadline" /></strong>
       {:else}
         {new Date(submit.submitted).toLocaleString('cs')}
       {/if}
