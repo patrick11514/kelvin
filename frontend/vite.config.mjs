@@ -27,7 +27,7 @@ export default defineConfig((env) => {
             },
             sourcemap: true,
             outDir: '../web/static',
-            minify: production ? 'terser' : undefined,
+            minify: production ? 'terser' : false,
             rollupOptions: {
                 output: {
                     assetFileNames: 'frontend.[ext]'
