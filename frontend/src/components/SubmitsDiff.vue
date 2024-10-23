@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { watch } from 'vue';
+import * as Diff2Html from 'diff2html';
 
 const { submits, currentSubmit, deadline } = defineProps<{
     submits: Submit[];
     currentSubmit: number;
     deadline: string;
 }>();
+
+console.log(submits, currentSubmit, deadline);
 
 type Submit = {
     points: number;

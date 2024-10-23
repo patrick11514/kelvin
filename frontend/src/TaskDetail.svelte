@@ -3,7 +3,6 @@ import SubmitSource from './SubmitSource.svelte';
 import SyncLoader from './SyncLoader.svelte';
 import CopyToClipboard from './CopyToClipboard.svelte';
 import SummaryComments from './SummaryComments.svelte';
-import SubmitsDiff from './SubmitsDiff.svelte';
 import { fetch } from './api.js';
 import { user } from './global';
 import { notifications } from './notifications.js';
@@ -309,6 +308,10 @@ window.addEventListener('hashchange', goToSelectedLines);
     <a href="download" download title="Download"
       ><span class="iconify" data-icon="fa-solid:download"></span></a>
   </div>
+  <kelvin-diff
+    submits={JSON.stringify(submits)}
+    current_submit={JSON.stringify(current_submit)}
+    deadline={JSON.stringify(deadline)} />
 
   {#if showDiff}
     <kelvin-diff {submits} {current_submit} {deadline} />

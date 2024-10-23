@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from zipfile import ZIP_DEFLATED, ZipFile
 
+from django.http.request import HttpRequest
 import django_rq
 import magic
 import rq
@@ -23,7 +24,8 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core import signing
 from django.core.exceptions import PermissionDenied
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import (FileResponse, Http404, HttpResponse,
+                         HttpResponseBadRequest, JsonResponse)
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django.urls import reverse
 from django.utils import timezone as datetime
@@ -32,23 +34,18 @@ from notifications.models import Notification
 from notifications.signals import notify
 
 from common.evaluate import get_meta
-from common.models import (
-    AssignedTask,
-    Class,
-    Comment,
-    Submit,
-    Task,
-    assignedtask_results,
-    current_semester,
-)
+from common.models import (AssignedTask, Class, Comment, Submit, Task,
+                           assignedtask_results, current_semester)
 from common.plagcheck.moss import PlagiarismMatch, moss_result
 from common.submit import SubmitRateLimited, store_submit
 from common.upload import MAX_UPLOAD_FILECOUNT, TooManyFilesError
 from common.utils import is_teacher
 from evaluator.results import EvaluationResult
 from evaluator.testsets import TestSet
-from kelvin.settings import BASE_DIR, MAX_INLINE_CONTENT_BYTES, MAX_INLINE_LINES
+from kelvin.settings import (BASE_DIR, MAX_INLINE_CONTENT_BYTES,
+                             MAX_INLINE_LINES)
 from web.task_utils import load_readme
+
 from .test_script import render_test_script
 from .utils import file_response
 
@@ -170,7 +167,8 @@ def get(submit):
     return data
 
 
-JobStatus = namedtuple("JobStatus", ["finished", "status", "message"], defaults=[False, "", ""])
+JobStatus = namedtuple(
+    "JobStatus", ["finished", "status", "message"], defaults=[False, "", ""])
 
 
 def get_submit_job_status(jobid):
@@ -183,7 +181,8 @@ def get_submit_job_status(jobid):
             return JobStatus(finished=False, status=f"in queue: {job.get_position() + 1}")
         elif status == "started":
             if "actions" in job.meta and job.meta["actions"] > 0:
-                percent = job.meta["current_action"] * 100 // job.meta["actions"]
+                percent = job.meta["current_action"] * \
+                    100 // job.meta["actions"]
                 return JobStatus(finished=False, status=f"evaluating {percent}%")
         elif status == "finished":
             return JobStatus(finished=True, status=status)
@@ -243,7 +242,7 @@ def build_plagiarism_entries(login: str, matches: List[PlagiarismMatch]) -> List
 
 
 @login_required()
-def task_detail(request, assignment_id, submit_num=None, login=None):
+def task_detail(request: HttpRequest, assignment_id, submit_num=None, login=None):
     submits = Submit.objects.filter(
         assignment__pk=assignment_id,
     ).order_by("-id")
@@ -283,6 +282,7 @@ def task_detail(request, assignment_id, submit_num=None, login=None):
         "max_inline_content_bytes": MAX_INLINE_CONTENT_BYTES,
         "has_pipeline": bool(testset.pipeline),
         "upload": not user_is_teacher or request.user.username == login,
+        "new_ui": "new_ui" in request.GET
     }
 
     current_submit = None
@@ -326,7 +326,8 @@ def task_detail(request, assignment_id, submit_num=None, login=None):
             assignment.deadline
             and submits.order_by("id").reverse()[0].created_at > assignment.deadline
         )
-        data["diff_versions"] = [(s.submit_num, s.created_at) for s in submits.order_by("id")]
+        data["diff_versions"] = [(s.submit_num, s.created_at)
+                                 for s in submits.order_by("id")]
 
         job_status = get_submit_job_status(current_submit.jobid)
 
@@ -346,7 +347,8 @@ def task_detail(request, assignment_id, submit_num=None, login=None):
             submit = store_submit(request, assignment)
         except TooManyFilesError:
             return HttpResponse(
-                f"You have uploaded too many files. The maximum allowed file count is {MAX_UPLOAD_FILECOUNT}.",
+                f"You have uploaded too many files. The maximum allowed file count is {
+                    MAX_UPLOAD_FILECOUNT}.",
                 status=400,
             )
         except SubmitRateLimited as e:
@@ -354,7 +356,8 @@ def task_detail(request, assignment_id, submit_num=None, login=None):
             # It can be spammy, but probably better than forcing them to select the files
             # repeatedly.
             return HttpResponse(
-                f"Too many submits. You need to wait {e.time_until_limit_expires.total_seconds():.0f}s before sending another submit",
+                f"Too many submits. You need to wait {
+                    e.time_until_limit_expires.total_seconds():.0f}s before sending another submit",
                 status=429,
             )
 
@@ -387,7 +390,8 @@ def find_task_detail(request, task_id, login=None):
     )
     if assignment is None:
         raise Http404()
-    url = "{}#src".format(resolve_url("task_detail", assignment_id=assignment.id, login=login))
+    url = "{}#src".format(resolve_url(
+        "task_detail", assignment_id=assignment.id, login=login))
     return redirect(url)
 
 
@@ -414,13 +418,16 @@ def submit_source(request, submit_id, path):
             path = s.phys
             mime = mimedetector.from_file(s.phys)
             if request.GET.get("convert", False):
-                key = hashlib.sha1(f"{submit_id}{path}".encode("utf-8")).hexdigest()
-                path = os.path.join(BASE_DIR, "cache", "media", key[0], key[1], key)
+                key = hashlib.sha1(
+                    f"{submit_id}{path}".encode("utf-8")).hexdigest()
+                path = os.path.join(BASE_DIR, "cache",
+                                    "media", key[0], key[1], key)
                 os.makedirs(os.path.dirname(path), exist_ok=True)
                 if not os.path.exists(path):
                     if mime.startswith("image/"):
                         try:
-                            subprocess.check_call(["/usr/bin/convert", s.phys, f"WEBP:{path}"])
+                            subprocess.check_call(
+                                ["/usr/bin/convert", s.phys, f"WEBP:{path}"])
                         except subprocess.CalledProcessError as e:
                             path = s.phys
                             logging.exception(e)
@@ -494,7 +501,8 @@ def submit_diff(request, login, assignment_id, submit_a, submit_b):
         out = get_patch(str(submit_a), str(submit_b))
         out = re.sub(r"^(---|\+\+\+) [0-9]+/", "\\1 ", out, flags=re.M)
 
-    out = "\n".join([line for line in out.split("\n") if not line.startswith("Binary file")])
+    out = "\n".join([line for line in out.split(
+        "\n") if not line.startswith("Binary file")])
     resp = HttpResponse(out)
     resp["Content-Type"] = "text/x-diff"
     return resp
@@ -583,7 +591,8 @@ def submit_comments(request, assignment_id, login, submit_num):
 
         Notification.objects.filter(
             action_object_object_id=comment.id,
-            action_object_content_type=ContentType.objects.get_for_model(Comment),
+            action_object_content_type=ContentType.objects.get_for_model(
+                Comment),
         ).delete()
 
         if not data["text"]:
@@ -631,7 +640,8 @@ def submit_comments(request, assignment_id, login, submit_num):
                     "path": name,
                     "sources": [],
                 }
-            result[name]["sources"].append(reverse("submit_source", args=[submit.id, source.virt]))
+            result[name]["sources"].append(
+                reverse("submit_source", args=[submit.id, source.virt]))
         else:
             content = ""
             content_url = None
@@ -665,7 +675,8 @@ def submit_comments(request, assignment_id, login, submit_num):
         for source, comments in pipe.comments.items():
             for comment in comments:
                 try:
-                    line = min(result[source]["content"].count("\n"), int(comment["line"])) - 1
+                    line = min(result[source]["content"].count(
+                        "\n"), int(comment["line"])) - 1
                     if not any(
                         filter(
                             lambda c: c["text"] == comment["text"],
@@ -728,7 +739,8 @@ def raw_test_content(request, task_name, test_name, file):
         if test.name == test_name:
             if file in test.files:
                 return file_response(
-                    test.files[file].open("rb"), f"{test_name}.{file}", "text/plain"
+                    test.files[file].open("rb"), f"{test_name}.{
+                        file}", "text/plain"
                 )
     raise Http404()
 
@@ -804,7 +816,8 @@ def task_asset(request, task_name, path):
         if not path.split("/")[-1].startswith("announce."):
             raise PermissionDenied()
 
-    deny_files = ["config.yml", "tests.yml", "script.py", "solution.c", "solution.cpp"]
+    deny_files = ["config.yml", "tests.yml",
+                  "script.py", "solution.c", "solution.cpp"]
     if ".." in path or (path in deny_files and not is_teacher(request.user)):
         raise PermissionDenied()
 
@@ -890,7 +903,8 @@ def raw_result_content(request, submit_id, test_name, result_type, file):
                                 test.files[file][result_type].read(), content_type="text/html"
                             )
                         else:
-                            file_content = test.files[file][result_type].open("rb").read()
+                            file_content = test.files[file][result_type].open(
+                                "rb").read()
                             file_name = f"{result_type}-{file}"
                             extension = os.path.splitext(file)[1]
                             file_mime = mimedetector.from_buffer(file_content)
