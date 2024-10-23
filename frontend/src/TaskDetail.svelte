@@ -308,11 +308,9 @@ window.addEventListener('hashchange', goToSelectedLines);
     <a href="download" download title="Download"
       ><span class="iconify" data-icon="fa-solid:download"></span></a>
   </div>
-  <kelvin-diff
-    submits={JSON.stringify(submits)}
-    current_submit={JSON.stringify(current_submit)}
-    deadline={JSON.stringify(deadline)} />
-
+  PRE
+  <kelvin-test date-time="2024-10-23T12:34:09.864Z"></kelvin-test>
+  POST
   {#if showDiff}
     <kelvin-diff {submits} {current_submit} {deadline} />
   {/if}

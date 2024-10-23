@@ -147,6 +147,7 @@ import { defineCustomElement, h } from 'vue';
 import SuspensionWrapper from './components/SuspensionWrapper.vue';
 import AllTasks from './Teacher/AllTasks.vue';
 import SubmitsDiff from './components/SubmitsDiff.vue';
+import TimeAgo from './components/TimeAgo.vue';
 
 /**
  * Register new Vue component as a custom element.
@@ -183,4 +184,5 @@ const registerSuspendedVueComponent = (name, component, configureApp = undefined
 };
 
 registerSuspendedVueComponent('tasks-all', AllTasks);
+registerVueComponent('test', TimeAgo);
 registerVueComponent('diff', SubmitsDiff);
