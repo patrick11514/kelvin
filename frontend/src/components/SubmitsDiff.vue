@@ -8,8 +8,6 @@ const { submits, currentSubmit, deadline } = defineProps<{
   deadline: Date;
 }>();
 
-console.log(submits, currentSubmit, deadline);
-
 type Submit = {
   points: number;
   comments: number;

@@ -1,4 +1,4 @@
-<script>
+<script setup lang="ts">
 import SubmitSource from './SubmitSource.svelte';
 import SyncLoader from './SyncLoader.svelte';
 import CopyToClipboard from './CopyToClipboard.svelte';
@@ -9,7 +9,10 @@ import { notifications } from './notifications.js';
 import { hideComments, HideCommentsState } from './stores.js';
 import SubmitsDiff from './SubmitsDiff.svelte';
 
-export let url;
+const {url} = defineProps<{
+    url: string
+}>();
+
 let files = null;
 let summaryComments = [];
 let submits = null;
@@ -275,7 +278,7 @@ window.addEventListener('hashchange', goToSelectedLines);
 </script>
 
 <svelte:window on:keydown={keydown} />
-
+<template>
 {#if files === null}
   <div class="d-flex justify-content-center">
     <SyncLoader />
@@ -373,6 +376,8 @@ window.addEventListener('hashchange', goToSelectedLines);
     {/if}
   {/each}
 {/if}
+
+</template>
 
 <style>
 video,
