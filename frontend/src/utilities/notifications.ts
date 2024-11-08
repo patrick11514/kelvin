@@ -19,20 +19,23 @@ export type Notification = {
     actor: string;
     action_object: string;
     action_object_url: string;
+    custom_text?: string;
+    target?: string;
 };
 
-export const notifications = (function() {
-    const { subscribe, set, value } = refToStore<Notification[]>([]);
+export const notifications = (function () {
+    const { subscribe, set, ref } = refToStore<Notification[]>([]);
 
-    const refresh = async function refresh() {
+    const refresh = async () => {
         const res = await fetch('/notification/all');
-        set((await res.json())['notifications']);
+        const json = await res.json();
+        set(json['notifications']);
     };
 
     refresh();
 
     return {
-        value,
+        ref,
         subscribe,
         markRead: async (id: number) => {
             const res = await fetch('/notification/mark_as_read/' + id, { method: 'POST' });
@@ -45,8 +48,8 @@ export const notifications = (function() {
     };
 })();
 
-export const pushNotifications = (function() {
-    const { subscribe, update, value } = refToStore({
+export const pushNotifications = (function () {
+    const { subscribe, update, ref } = refToStore({
         supported: false,
         enabled: null
     });
@@ -139,7 +142,7 @@ export const pushNotifications = (function() {
     }
 
     return {
-        value,
+        ref,
         subscribe,
         subscribePushNotifications
     };
