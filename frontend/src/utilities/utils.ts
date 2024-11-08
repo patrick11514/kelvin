@@ -1,4 +1,4 @@
-import { isRef, readonly, ref, watch, type Ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -54,6 +54,7 @@ const localStorageStores: Record<string, Ref<unknown>> = {};
  *
  * @param key Key of localStorage item
  * @param initialValue Initial value of item
+ *
  * @returns {@link Ref} to localStorage value
  */
 export const localStorageStore = <$Type>(key: string, initialValue: $Type): Ref<$Type> => {

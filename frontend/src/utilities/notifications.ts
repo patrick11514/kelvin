@@ -1,6 +1,6 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { fetch } from './api';
-import { computed } from '@vue/reactivity';
+import { computed } from 'vue';
 
 //@TODO: complete null unions if missing
 export type Notification = {
