@@ -47,20 +47,16 @@ export const generateRange = (size: number, start = 0) => {
     return Array.from({ length: size }).map((_, i) => i + start);
 };
 
-const localStorageStores: Record<
-    string,
-    Omit<ReturnType<typeof refToStore<unknown>>, 'update'>
-> = {};
+const localStorageStores: Record<string, Ref<unknown>> = {};
 
 /**
- * Returns object containing update and set function (see {@link refToStorage()}, which can modify value synced with localStorage
+ * Returns ref to value in localStorage. When updated, automatically saved to localStorage.
  *
  * @param key Key of localStorage item
  * @param initialValue Initial value of item
- * @returns Object, with set of functions: subscribe and set see {@link refToStore()}.
- * Only difference is, that set function will also update value in localStorage.
+ * @returns {@link Ref} to localStorage value
  */
-export const localStorageStore = <$Type>(key: string, initialValue: $Type) => {
+export const localStorageStore = <$Type>(key: string, initialValue: $Type): Ref<$Type> => {
     if (!(key in localStorageStores)) {
         const saved = localStorage.getItem(key);
         if (saved) {
@@ -71,73 +67,10 @@ export const localStorageStore = <$Type>(key: string, initialValue: $Type) => {
             }
         }
 
-        const { subscribe, set, ref } = refToStore(initialValue);
+        const value = ref(initialValue);
 
-        localStorageStores[key] = {
-            ref,
-            subscribe,
-            set(value: $Type) {
-                localStorage.setItem(key, JSON.stringify(value));
-                set(value);
-            }
-        };
+        localStorageStores[key] = value;
+        watch(value, (newValue) => localStorage.setItem(key, JSON.stringify(newValue)));
     }
-    return localStorageStores[key];
-};
-
-/**
- * Type for callback used in subscribe function returned in refToStore
- */
-type SubscribeCallback<$Type> = (value: $Type) => Promise<void> | void;
-
-/**
- * Type fo callback used in update function returned in refToStore
- */
-type UpdateCallback<$Type> = (value: $Type) => $Type;
-
-/**
- * Create pair of three functions: subscribe, set, update.
- * These function coresponds to Svelte's Writable store functions.
- * - value is getter to get readonly proxy to reference
- * - Subscribe function will get callback, which will be called whenever ref value will change.
- * - Set function will get value and update value inside ref.
- * - Update function will get callback, which will get called with current value and callback can mutate it and return.
- * This returned value will be then set.
- *
- * @param refOrValue Reference of value which should be default value for reference
- * @returns Object containing subscribe and set function
- */
-export const refToStore = <$RefType>(refOrValue: Ref<$RefType> | $RefType) => {
-    let reference: Ref<$RefType>;
-    if (isRef(refOrValue)) reference = refOrValue;
-    else reference = ref(refOrValue) as Ref<$RefType>;
-
-    return {
-        get ref() {
-            return readonly(reference);
-        },
-        subscribe: (callback: SubscribeCallback<$RefType>) => {
-            watch(reference, callback);
-        },
-        set: (value: $RefType) => {
-            reference.value = value;
-        },
-        update: (callback: UpdateCallback<$RefType>) => {
-            reference.value = callback(reference.value);
-        }
-    };
-};
-
-export const derived = <$StoreType, $DerivedType>(
-    storeLike: { subscribe: (callback: SubscribeCallback<$StoreType>) => void },
-    modify: (value: $StoreType) => $DerivedType
-) => {
-    const internalRef = ref<$DerivedType>();
-    const store = refToStore(internalRef);
-
-    storeLike.subscribe(async (value) => {
-        store.set(modify(value));
-    });
-
-    return store;
+    return localStorageStores[key] as Ref<$Type>;
 };

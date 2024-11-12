@@ -1,5 +1,6 @@
+import { ref, watch } from 'vue';
 import { fetch } from './api';
-import { derived, refToStore } from '../utilities/utils';
+import { computed } from '@vue/reactivity';
 
 //@TODO: complete null unions if missing
 export type Notification = {
@@ -24,32 +25,31 @@ export type Notification = {
 };
 
 export const notifications = (function () {
-    const { subscribe, set, ref } = refToStore<Notification[]>([]);
+    const notificationsRef = ref<Notification[]>([]);
 
     const refresh = async () => {
         const res = await fetch('/notification/all');
         const json = await res.json();
-        set(json['notifications']);
+        notificationsRef.value = json['notifications'];
     };
 
     refresh();
 
     return {
-        ref,
-        subscribe,
+        notificationsRef,
         markRead: async (id: number) => {
             const res = await fetch('/notification/mark_as_read/' + id, { method: 'POST' });
-            set((await res.json())['notifications']);
+            notificationsRef.value = (await res.json())['notifications'];
         },
         markAllRead: async () => {
             const res = await fetch('/notification/mark_as_read', { method: 'POST' });
-            set((await res.json())['notifications']);
+            notificationsRef.value = (await res.json())['notifications'];
         }
     };
 })();
 
 export const pushNotifications = (function () {
-    const { subscribe, update, ref } = refToStore({
+    const pushNotificationsStatus = ref({
         supported: false,
         enabled: null
     });
@@ -115,10 +115,7 @@ export const pushNotifications = (function () {
 
     async function subscribePushNotifications() {
         const isEnabled = (await getSubscription()) !== null;
-        update((s) => {
-            s.enabled = isEnabled;
-            return s;
-        });
+        pushNotificationsStatus.value.enabled = isEnabled;
         return isEnabled;
     }
 
@@ -130,10 +127,7 @@ export const pushNotifications = (function () {
                 if (!reg.showNotification) {
                     return;
                 }
-                update((s) => {
-                    s.supported = true;
-                    return s;
-                });
+                pushNotificationsStatus.value.supported = true;
                 subscribePushNotifications();
             } catch (err) {
                 console.log(err);
@@ -142,17 +136,14 @@ export const pushNotifications = (function () {
     }
 
     return {
-        ref,
-        subscribe,
+        ref: pushNotificationsStatus,
         subscribePushNotifications
     };
 })();
 
-export const notificationsCount = derived(
-    notifications,
-    (notifications) => notifications.filter((n) => n.unread).length
+export const notificationsCount = computed(
+    () => notifications.notificationsRef.value.filter((n) => n.unread).length
 );
-export const importantNotificationsCount = derived(
-    notifications,
-    (notifications) => notifications.filter((n) => n.important && n.unread).length
+export const importantNotificationsCount = computed(
+    () => notifications.notificationsRef.value.filter((n) => n.important && n.unread).length
 );
