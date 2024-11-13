@@ -15,6 +15,8 @@ import rust from 'highlight.js/lib/languages/rust';
 import shell from 'highlight.js/lib/languages/shell';
 import x86asm from 'highlight.js/lib/languages/x86asm';
 import xml from 'highlight.js/lib/languages/xml';
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
 
 hljs.registerLanguage('c-like', cpp);
 hljs.registerLanguage('c', c);
@@ -30,6 +32,8 @@ hljs.registerLanguage('assembler', x86asm);
 hljs.registerLanguage('asm', x86asm);
 hljs.registerLanguage('x86asm', x86asm);
 hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('ts', typescript);
+hljs.registerLanguage('js', javascript);
 hljs.highlightAll();
 
 import * as Diff2Html from 'diff2html';
