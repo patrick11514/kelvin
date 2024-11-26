@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/**
+ * This component is used as Editor for editing file content.
+ * It provides interface for adding Extensions, which
+ * can for example add custom linting or hinting.
+ * Currently it is nowhere available, since integration
+ * would need to rewrite much more components.
+ */
+
 import CodeMirror, { EditorFromTextArea, type EditorConfiguration } from 'codemirror';
 import { ref, watch } from 'vue';
 import { currentTheme, ThemeValue } from '../utilities/storage';
