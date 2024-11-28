@@ -32,8 +32,8 @@ hljs.registerLanguage('assembler', x86asm);
 hljs.registerLanguage('asm', x86asm);
 hljs.registerLanguage('x86asm', x86asm);
 hljs.registerLanguage('rust', rust);
-hljs.registerLanguage('ts', typescript);
-hljs.registerLanguage('js', javascript);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('javascript', javascript);
 hljs.highlightAll();
 
 import * as Diff2Html from 'diff2html';
