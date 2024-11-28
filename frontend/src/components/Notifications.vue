@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/**
+ * This component displays bell with number of notifications next to it.
+ * After opening, it shows list of all notifications, which user got.
+ * It is available to both teachers and students, and it is accesible from
+ * main layout on each page, next to name.
+ */
+
 import {
   notifications,
   pushNotifications,
