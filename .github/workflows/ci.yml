@@ -51,6 +51,12 @@ jobs:
         run: |
           cd frontend
           npm run test
+      - name: Print system timezone and date
+        run: |
+          echo "System Timezone: $(cat /etc/timezone || echo 'Unknown')"
+          echo "Current Time: $(date)"
+          echo "Node Timezone: $(node -e 'console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)')"
+          echo "Node Current Time: $(node -e 'console.log(new Date().toString())')"
 
   build-docker:
     runs-on: ubuntu-latest
