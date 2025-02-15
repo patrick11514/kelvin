@@ -45,18 +45,18 @@ jobs:
         run: |
           cd frontend
           npm run check
-      - name: Run tests
-        env:
-          TZ: "UTC"
-        run: |
-          cd frontend
-          npm run test
       - name: Print system timezone and date
         run: |
           echo "System Timezone: $(cat /etc/timezone || echo 'Unknown')"
           echo "Current Time: $(date)"
           echo "Node Timezone: $(node -e 'console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)')"
           echo "Node Current Time: $(node -e 'console.log(new Date().toString())')"
+      - name: Run tests
+        env:
+          TZ: "UTC"
+        run: |
+          cd frontend
+          npm run test
 
   build-docker:
     runs-on: ubuntu-latest
