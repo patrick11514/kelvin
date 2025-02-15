@@ -4,8 +4,6 @@ on:
   merge_group:
 jobs:
   test-backend:
-    env:
-      TZ: "UTC"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -47,6 +45,8 @@ jobs:
           cd frontend
           npm run check
       - name: Run tests
+        env:
+          TZ: "UTC"
         run: |
           cd frontend
           npm run test
