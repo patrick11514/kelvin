@@ -1,5 +1,6 @@
 name: CI
 on:
+  pull:
   pull_request:
   merge_group:
 jobs:
