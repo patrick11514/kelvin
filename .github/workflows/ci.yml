@@ -46,6 +46,8 @@ jobs:
           cd frontend
           npm run check
       - name: Print system timezone and date
+        env:
+          TZ: "CET"
         run: |
           echo "System Timezone: $(cat /etc/timezone || echo 'Unknown')"
           echo "Current Time: $(date)"
