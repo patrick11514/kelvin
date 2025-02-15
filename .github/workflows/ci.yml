@@ -4,6 +4,8 @@ on:
   merge_group:
 jobs:
   test-backend:
+    env:
+    TZ: "UTC"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
